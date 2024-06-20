@@ -1,17 +1,19 @@
 import { useState } from "react";
 import { useQuotes, useAddQuote, useDeleteQuote } from "../integrations/supabase/index.js";
-import { Container, VStack, Input, Button, Text, Box, Heading } from "@chakra-ui/react";
+import { Container, VStack, Input, Button, Text, Box, Heading, Textarea } from "@chakra-ui/react";
 
 const Index = () => {
   const { data: quotes, isLoading, isError } = useQuotes();
   const addQuoteMutation = useAddQuote();
   const deleteQuoteMutation = useDeleteQuote();
   const [newQuote, setNewQuote] = useState("");
+  const [newDescription, setNewDescription] = useState("");
 
   const handleAddQuote = () => {
-    if (newQuote.trim() !== "") {
-      addQuoteMutation.mutate({ quote: newQuote });
+    if (newQuote.trim() !== "" && newDescription.trim() !== "") {
+      addQuoteMutation.mutate({ quote: newQuote, description: newDescription });
       setNewQuote("");
+      setNewDescription("");
     }
   };
 
@@ -28,6 +30,11 @@ const Index = () => {
           value={newQuote}
           onChange={(e) => setNewQuote(e.target.value)}
         />
+        <Textarea
+          placeholder="Enter description"
+          value={newDescription}
+          onChange={(e) => setNewDescription(e.target.value)}
+        />
         <Button onClick={handleAddQuote} colorScheme="teal" isLoading={addQuoteMutation.isLoading}>Add Quote</Button>
         {isLoading ? (
           <Text>Loading...</Text>
@@ -37,7 +44,8 @@ const Index = () => {
           <VStack spacing={2} width="100%">
             {quotes.map((quote) => (
               <Box key={quote.id} p={4} borderWidth="1px" borderRadius="md" width="100%">
-                <Text>{quote.quote}</Text>
+                <Text fontWeight="bold">{quote.quote}</Text>
+                <Text>{quote.description}</Text>
                 <Button onClick={() => handleDeleteQuote(quote.id)} colorScheme="red" size="sm" mt={2}>Delete</Button>
               </Box>
             ))}
