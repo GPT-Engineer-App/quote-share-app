@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { FaPalette } from 'react-icons/fa';
+import { SketchPicker } from 'react-color';
 import { useQuotes, useAddQuote, useDeleteQuote } from "../integrations/supabase/index.js";
 import { Container, VStack, Input, Button, Text, Box, Heading, Textarea } from "@chakra-ui/react";
 
@@ -9,6 +11,8 @@ const Index = () => {
   const [newQuote, setNewQuote] = useState("");
   const [newDescription, setNewDescription] = useState("");
   const [newBackgroundColor, setNewBackgroundColor] = useState("#ffffff");
+
+  const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
 
   const handleAddQuote = () => {
     if (newQuote.trim() !== "" && newDescription.trim() !== "") {
@@ -21,6 +25,14 @@ const Index = () => {
 
   const handleDeleteQuote = (id) => {
     deleteQuoteMutation.mutate(id);
+  };
+
+  const handleColorChange = (color) => {
+    setNewBackgroundColor(color.hex);
+  };
+
+  const toggleColorPicker = () => {
+    setIsColorPickerOpen(!isColorPickerOpen);
   };
 
   return (
@@ -37,11 +49,12 @@ const Index = () => {
           value={newDescription}
           onChange={(e) => setNewDescription(e.target.value)}
         />
-        <Input
-          type="color"
-          value={newBackgroundColor}
-          onChange={(e) => setNewBackgroundColor(e.target.value)}
-        />
+        <Button onClick={toggleColorPicker} colorScheme="teal" leftIcon={<FaPalette />} size="lg" borderRadius="full" p={4}>
+          {isColorPickerOpen ? "Close Color Picker" : "Pick Background Color"}
+        </Button>
+        {isColorPickerOpen && (
+          <SketchPicker color={newBackgroundColor} onChange={handleColorChange} />
+        )}
         <Button onClick={handleAddQuote} colorScheme="teal" isLoading={addQuoteMutation.isLoading}>Add Quote</Button>
         {isLoading ? (
           <Text>Loading...</Text>
