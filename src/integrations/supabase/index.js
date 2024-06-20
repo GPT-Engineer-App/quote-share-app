@@ -19,53 +19,57 @@ const fromSupabase = async (query) => {
 
 /* supabase integration types
 
-// EXAMPLE TYPES SECTION
-// DO NOT USE TYPESCRIPT
+### quotes
 
-### foos
+| name       | type        | format | required |
+|------------|-------------|--------|----------|
+| id         | int8        | number | true     |
+| created_at | timestamptz | string | true     |
+| quote      | text        | string | false    |
+| description| text        | string | false    |
+| author     | text        | string | false    |
+| background | text        | string | false    |
 
-| name    | type | format | required |
-|---------|------|--------|----------|
-| id      | int8 | number | true     |
-| title   | text | string | true     |
-| date    | date | string | true     |
-
-### bars
-
-| name    | type | format | required |
-|---------|------|--------|----------|
-| id      | int8 | number | true     |
-| foo_id  | int8 | number | true     |  // foreign key to foos
-	
 */
 
-// Example hook for models
+// Hooks for quotes table
 
-export const useFoo = ()=> useQuery({
-    queryKey: ['foos'],
-    queryFn: fromSupabase(supabase.from('foos')),
-})
-export const useAddFoo = () => {
+export const useQuotes = () => useQuery({
+    queryKey: ['quotes'],
+    queryFn: () => fromSupabase(supabase.from('quotes').select('*')),
+});
+
+export const useQuote = (id) => useQuery({
+    queryKey: ['quotes', id],
+    queryFn: () => fromSupabase(supabase.from('quotes').select('*').eq('id', id).single()),
+});
+
+export const useAddQuote = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (newFoo)=> fromSupabase(supabase.from('foos').insert([{ title: newFoo.title }])),
-        onSuccess: ()=> {
-            queryClient.invalidateQueries('foos');
+        mutationFn: (newQuote) => fromSupabase(supabase.from('quotes').insert([newQuote])),
+        onSuccess: () => {
+            queryClient.invalidateQueries('quotes');
         },
     });
 };
 
-export const useBar = ()=> useQuery({
-    queryKey: ['bars'],
-    queryFn: fromSupabase(supabase.from('bars')),
-})
-export const useAddBar = () => {
+export const useUpdateQuote = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (newBar)=> fromSupabase(supabase.from('bars').insert([{ foo_id: newBar.foo_id }])),
-        onSuccess: ()=> {
-            queryClient.invalidateQueries('bars');
+        mutationFn: (updatedQuote) => fromSupabase(supabase.from('quotes').update(updatedQuote).eq('id', updatedQuote.id)),
+        onSuccess: () => {
+            queryClient.invalidateQueries('quotes');
         },
     });
 };
 
+export const useDeleteQuote = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id) => fromSupabase(supabase.from('quotes').delete().eq('id', id)),
+        onSuccess: () => {
+            queryClient.invalidateQueries('quotes');
+        },
+    });
+};
